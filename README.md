@@ -66,6 +66,12 @@ Open:
 
 - `http://127.0.0.1:8790`
 
+## Live screenshot
+
+Bitcoin scan after typing `bitcoin` in Search and running `Run Scan`:
+
+![PolyRadar bitcoin scan](docs/polyradar-bitcoin-scan.png)
+
 ## API
 
 - `GET /api/health`
