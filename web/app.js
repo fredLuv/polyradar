@@ -6,7 +6,20 @@ const limitEl = document.getElementById('limit');
 const enrichEl = document.getElementById('enrich');
 const cardTemplate = document.getElementById('cardTemplate');
 
+const tradePanel = document.getElementById('tradePanel');
+const tradeModeBadge = document.getElementById('tradeModeBadge');
+const tradeMarket = document.getElementById('tradeMarket');
+const tradeSideEl = document.getElementById('tradeSide');
+const tradeAmountEl = document.getElementById('tradeAmount');
+const simulateBtn = document.getElementById('simulateBtn');
+const copyCmdBtn = document.getElementById('copyCmdBtn');
+const executeBtn = document.getElementById('executeBtn');
+const tradeRisk = document.getElementById('tradeRisk');
+const tradeCommand = document.getElementById('tradeCommand');
+
 let config = null;
+let selectedMarket = null;
+let lastSimulation = null;
 
 function fmtMoney(num) {
   if (num == null || Number.isNaN(num)) return '-';
@@ -25,26 +38,139 @@ function toast(message) {
 async function loadConfig() {
   const res = await fetch('/api/config');
   config = await res.json();
+
+  tradeModeBadge.textContent = config.tradingEnabled ? 'trade enabled' : 'trade disabled';
+  tradeModeBadge.classList.toggle('enabled', config.tradingEnabled);
+  executeBtn.disabled = !config.tradingEnabled;
 }
 
-async function simulateCommand(token, side, amount = 5) {
+async function simulateCommand(token, side, amount) {
   const res = await fetch('/api/trade/simulate', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ token, side, amount })
   });
-  if (!res.ok) throw new Error('simulate failed');
-  return res.json();
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error || 'simulate failed');
+  return body;
 }
 
-async function copyCommand(token, side) {
-  try {
-    const payload = await simulateCommand(token, side, 5);
-    await navigator.clipboard.writeText(payload.commandText);
-    toast(`Copied ${side.toUpperCase()} command`);
-  } catch (error) {
-    toast(`Could not copy command: ${error.message}`);
+async function executeTrade(token, side, amount) {
+  const res = await fetch('/api/trade/execute', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ token, side, amount })
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(body.error || 'execute failed');
+  return body;
+}
+
+function renderTradePanel() {
+  if (!selectedMarket) {
+    tradePanel.classList.add('hidden');
+    return;
   }
+
+  tradePanel.classList.remove('hidden');
+  tradeMarket.innerHTML = [
+    `<strong>${selectedMarket.question}</strong>`,
+    `token=${selectedMarket.tokenId}`,
+    `score=${selectedMarket.score.toFixed(2)} | volume=$${fmtMoney(selectedMarket.volume)} | liquidity=$${fmtMoney(selectedMarket.liquidity)}`
+  ].join('<br/>');
+}
+
+function resetSimulationState() {
+  lastSimulation = null;
+  tradeRisk.innerHTML = '';
+  tradeCommand.textContent = 'No command yet.';
+}
+
+async function runSimulation() {
+  if (!selectedMarket?.tokenId) {
+    toast('Select a market with token ID first.');
+    return;
+  }
+
+  const side = tradeSideEl.value;
+  const amount = Number(tradeAmountEl.value);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    toast('Amount must be > 0.');
+    return;
+  }
+
+  simulateBtn.disabled = true;
+  toast('Simulating command...');
+
+  try {
+    const payload = await simulateCommand(selectedMarket.tokenId, side, amount);
+    lastSimulation = { payload, token: selectedMarket.tokenId, side, amount };
+
+    tradeCommand.textContent = payload.commandText;
+    tradeRisk.innerHTML = payload.riskChecks.map((line) => `<div>- ${line}</div>`).join('');
+    toast(`Simulation ready for ${side.toUpperCase()} ${amount}`);
+  } catch (error) {
+    toast(`Simulation failed: ${error.message}`);
+  } finally {
+    simulateBtn.disabled = false;
+  }
+}
+
+async function copyLastCommand() {
+  if (!lastSimulation?.payload?.commandText) {
+    toast('Run simulation first.');
+    return;
+  }
+
+  await navigator.clipboard.writeText(lastSimulation.payload.commandText);
+  toast('Command copied to clipboard');
+}
+
+async function runExecute() {
+  if (!config?.tradingEnabled) {
+    toast('Trading is disabled on server.');
+    return;
+  }
+
+  if (!selectedMarket?.tokenId) {
+    toast('Select a market first.');
+    return;
+  }
+
+  const side = tradeSideEl.value;
+  const amount = Number(tradeAmountEl.value);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    toast('Amount must be > 0.');
+    return;
+  }
+
+  const confirmed = window.confirm(`Execute ${side.toUpperCase()} ${amount} for selected market?`);
+  if (!confirmed) return;
+
+  executeBtn.disabled = true;
+  toast('Executing market order...');
+
+  try {
+    const result = await executeTrade(selectedMarket.tokenId, side, amount);
+    tradeCommand.textContent = JSON.stringify(result, null, 2);
+    toast('Trade submitted. Check order/trade status in CLI.');
+  } catch (error) {
+    toast(`Execute failed: ${error.message}`);
+  } finally {
+    executeBtn.disabled = !config.tradingEnabled;
+  }
+}
+
+async function copyToken(token) {
+  await navigator.clipboard.writeText(token);
+  toast('Token copied');
+}
+
+function selectMarket(market) {
+  selectedMarket = market;
+  renderTradePanel();
+  resetSimulationState();
+  tradePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function renderMarkets(markets) {
@@ -62,8 +188,8 @@ function renderMarkets(markets) {
     const link = node.querySelector('.open');
     const question = node.querySelector('.question');
     const meta = node.querySelector('.meta');
-    const buy = node.querySelector('.copy-buy');
-    const sell = node.querySelector('.copy-sell');
+    const prepareBtn = node.querySelector('.prepare-trade');
+    const copyTokenBtn = node.querySelector('.copy-token');
 
     score.textContent = `Score ${market.score.toFixed(2)}`;
     question.textContent = market.question;
@@ -83,13 +209,13 @@ function renderMarkets(markets) {
     ].join('<br/>');
 
     if (!market.tokenId) {
-      buy.disabled = true;
-      sell.disabled = true;
-      buy.textContent = 'No token';
-      sell.textContent = 'No token';
+      prepareBtn.disabled = true;
+      copyTokenBtn.disabled = true;
+      prepareBtn.textContent = 'Token unavailable';
+      copyTokenBtn.textContent = 'No token';
     } else {
-      buy.addEventListener('click', () => copyCommand(market.tokenId, 'buy'));
-      sell.addEventListener('click', () => copyCommand(market.tokenId, 'sell'));
+      prepareBtn.addEventListener('click', () => selectMarket(market));
+      copyTokenBtn.addEventListener('click', () => copyToken(market.tokenId));
     }
 
     card.dataset.score = String(market.score);
@@ -128,6 +254,13 @@ async function runScan() {
 }
 
 scanBtn.addEventListener('click', runScan);
+simulateBtn.addEventListener('click', runSimulation);
+copyCmdBtn.addEventListener('click', () => {
+  copyLastCommand().catch((error) => toast(`Copy failed: ${error.message}`));
+});
+executeBtn.addEventListener('click', runExecute);
+tradeSideEl.addEventListener('change', resetSimulationState);
+tradeAmountEl.addEventListener('input', resetSimulationState);
 
 (async function init() {
   await loadConfig();

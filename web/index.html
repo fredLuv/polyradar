@@ -37,6 +37,32 @@
       </section>
 
       <section id="results" class="grid"></section>
+
+      <section id="tradePanel" class="panel trade-panel hidden">
+        <div class="trade-head">
+          <h2>Trade Prep</h2>
+          <div id="tradeModeBadge" class="badge">trade disabled</div>
+        </div>
+        <div id="tradeMarket" class="trade-market">Select a market from the scan results.</div>
+        <div class="trade-controls">
+          <div class="field">
+            <label for="tradeSide">Side</label>
+            <select id="tradeSide">
+              <option value="buy">Buy</option>
+              <option value="sell">Sell</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="tradeAmount">Amount</label>
+            <input id="tradeAmount" type="number" min="1" step="1" value="5" />
+          </div>
+          <button id="simulateBtn">Simulate</button>
+          <button id="copyCmdBtn" class="secondary">Copy Command</button>
+          <button id="executeBtn" class="danger">Execute</button>
+        </div>
+        <div id="tradeRisk" class="trade-risk"></div>
+        <pre id="tradeCommand" class="trade-command">No command yet.</pre>
+      </section>
     </main>
 
     <template id="cardTemplate">
@@ -48,8 +74,8 @@
         <h3 class="question"></h3>
         <div class="meta"></div>
         <div class="actions">
-          <button class="copy-buy">Copy Buy Cmd</button>
-          <button class="copy-sell">Copy Sell Cmd</button>
+          <button class="prepare-trade">Prepare Trade</button>
+          <button class="copy-token secondary">Copy Token</button>
         </div>
       </article>
     </template>

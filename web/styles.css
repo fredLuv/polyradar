@@ -92,6 +92,28 @@ button {
   background: linear-gradient(140deg, var(--accent), #0b6f49);
 }
 
+button.secondary {
+  background: linear-gradient(140deg, #145ca1, #0a3f71);
+}
+
+button.danger {
+  background: linear-gradient(140deg, #b83a3a, #7d1d1d);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  font: inherit;
+  background: #fff;
+}
+
 .status {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 12px;
@@ -151,8 +173,76 @@ button {
   background: linear-gradient(140deg, #145ca1, #0a3f71);
 }
 
+.trade-panel.hidden {
+  display: none;
+}
+
+.trade-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.trade-head h2 {
+  margin: 0;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  background: #eee;
+}
+
+.badge.enabled {
+  background: #d9f6e8;
+  color: #0f6b48;
+}
+
+.trade-market {
+  margin-top: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.trade-controls {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 130px 140px repeat(3, minmax(120px, 1fr));
+  gap: 8px;
+  align-items: end;
+}
+
+.trade-risk {
+  margin-top: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.trade-command {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: #f8f9f7;
+  overflow: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 @media (max-width: 900px) {
   .controls {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .trade-controls {
     grid-template-columns: 1fr 1fr;
   }
 }
