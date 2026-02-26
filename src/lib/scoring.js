@@ -92,20 +92,10 @@ export function scoreMarket(market, depth = {}) {
 
   const score = liquidityScore + volumeScore + activityScore + midStabilityBonus - spreadPenalty;
 
-  let confidence = 0;
-  if (market.tokenId) confidence += 0.25;
-  if (market.volume > 0) confidence += 0.15;
-  if (market.liquidity > 0) confidence += 0.2;
-  if (midpoint != null) confidence += 0.2;
-  if (spread != null) confidence += 0.2;
-  if (depth.source === 'live' && midpoint != null && spread != null) confidence += 0.05;
-  confidence = Math.min(1, confidence);
-
   return {
     score: Number(score.toFixed(2)),
     spread,
-    midpoint,
-    confidence: Number(confidence.toFixed(2))
+    midpoint
   };
 }
 

@@ -99,7 +99,6 @@ async function buildScan({ search, limit, enrich, sortBy, order }) {
     enriched.push({
       ...market,
       ...metrics,
-      depthSource: depth.source,
       marketUrl: market.slug ? `https://polymarket.com/market/${market.slug}` : null
     });
   }

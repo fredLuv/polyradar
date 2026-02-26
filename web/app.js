@@ -212,11 +212,14 @@ function renderMarkets(markets) {
       link.textContent = 'No URL';
     }
 
-    meta.innerHTML = [
-      `volume=$${fmtMoney(market.volume)} | liquidity=$${fmtMoney(market.liquidity)}`,
-      `mid=${market.midpoint == null ? '-' : market.midpoint.toFixed(3)} | spread=${fmtPct(market.spread)}`,
-      `token=${market.tokenId || '-'}`
-    ].join('<br/>');
+    const metaLines = [`volume=$${fmtMoney(market.volume)} | liquidity=$${fmtMoney(market.liquidity)}`];
+    if (market.midpoint != null || market.spread != null) {
+      metaLines.push(
+        `mid=${market.midpoint == null ? '-' : market.midpoint.toFixed(3)} | spread=${fmtPct(market.spread)}`
+      );
+    }
+    metaLines.push(`token=${market.tokenId || '-'}`);
+    meta.innerHTML = metaLines.join('<br/>');
 
     if (!market.tokenId) {
       prepareBtn.disabled = true;
