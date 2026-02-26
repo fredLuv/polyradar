@@ -2,7 +2,7 @@
 
 Local scanner + trade-prep UI built on top of [`polymarket-cli`](https://github.com/Polymarket/polymarket-cli).
 
-![PolyRadar GTA scan (limit 12)](docs/polyradar-gta-latest.png)
+![PolyRadar GTA scan (limit 12)](docs/polyradar-gta-limit12.png)
 
 ## Quick start
 
