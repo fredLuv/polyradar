@@ -121,7 +121,7 @@ body {
 
 .controls {
   display: grid;
-  grid-template-columns: 1fr 120px 170px 160px;
+  grid-template-columns: 1fr 170px 120px 170px 160px;
   gap: 10px;
   align-items: end;
 }

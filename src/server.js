@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import express from 'express';
 import 'dotenv/config';
 import { PolymarketClient } from './lib/polymarketClient.js';
-import { normalizeMarket, scoreMarket, sortByScore } from './lib/scoring.js';
+import { normalizeMarket, scoreMarket, sortMarkets } from './lib/scoring.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,7 +30,7 @@ function asInt(value, fallback) {
   return Math.floor(num);
 }
 
-async function buildScan({ search, limit, enrich }) {
+async function buildScan({ search, limit, enrich, sortBy, order }) {
   const { source, markets } = await client.listMarketsWithFallback({ limit, search });
   const normalized = markets
     .map(normalizeMarket)
@@ -57,7 +57,9 @@ async function buildScan({ search, limit, enrich }) {
   return {
     source,
     generatedAt: new Date().toISOString(),
-    markets: sortByScore(enriched).slice(0, limit)
+    sortBy,
+    order,
+    markets: sortMarkets(enriched, { sortBy, order }).slice(0, limit)
   };
 }
 
@@ -88,9 +90,11 @@ app.get('/api/scan', async (req, res) => {
   const search = String(req.query.search || '').trim();
   const limit = Math.min(asInt(req.query.limit, defaultLimit), 100);
   const enrich = String(req.query.enrich || 'true').toLowerCase() !== 'false';
+  const sortBy = String(req.query.sort_by || 'liquidity').trim().toLowerCase();
+  const order = String(req.query.order || 'desc').trim().toLowerCase() === 'asc' ? 'asc' : 'desc';
 
   try {
-    const result = await buildScan({ search, limit, enrich });
+    const result = await buildScan({ search, limit, enrich, sortBy, order });
     res.json(result);
   } catch (error) {
     res.status(500).json({

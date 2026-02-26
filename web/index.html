@@ -38,6 +38,14 @@
           <input id="search" placeholder="bitcoin, election, inflation" />
         </div>
         <div class="field small">
+          <label for="sortBy">Sort</label>
+          <select id="sortBy">
+            <option value="liquidity">Liquidity (desc)</option>
+            <option value="volume">Volume (desc)</option>
+            <option value="score">Score (desc)</option>
+          </select>
+        </div>
+        <div class="field small">
           <label for="limit">Limit</label>
           <input id="limit" type="number" value="20" min="1" max="100" />
         </div>

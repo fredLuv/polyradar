@@ -2,6 +2,7 @@ const statusLine = document.getElementById('statusLine');
 const resultsEl = document.getElementById('results');
 const scanBtn = document.getElementById('scanBtn');
 const searchEl = document.getElementById('search');
+const sortByEl = document.getElementById('sortBy');
 const limitEl = document.getElementById('limit');
 const enrichEl = document.getElementById('enrich');
 const cardTemplate = document.getElementById('cardTemplate');
@@ -242,6 +243,8 @@ async function runScan() {
 
   const params = new URLSearchParams({
     search: searchEl.value.trim(),
+    sort_by: sortByEl.value || 'liquidity',
+    order: 'desc',
     limit: String(limitEl.value || 20),
     enrich: enrichEl.checked ? 'true' : 'false'
   });
@@ -255,7 +258,7 @@ async function runScan() {
 
     const trading = config?.tradingEnabled ? 'trade=enabled' : 'trade=disabled';
     toast(
-      `source=${body.source} | markets=${body.markets.length} | ${trading} | generated=${new Date(body.generatedAt).toLocaleTimeString()}`
+      `source=${body.source} | sort=${body.sortBy || sortByEl.value}:desc | markets=${body.markets.length} | ${trading} | generated=${new Date(body.generatedAt).toLocaleTimeString()}`
     );
     renderMarkets(body.markets);
   } catch (error) {

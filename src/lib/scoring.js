@@ -103,3 +103,19 @@ export function scoreMarket(market, depth = {}) {
 export function sortByScore(rows) {
   return [...rows].sort((a, b) => b.score - a.score);
 }
+
+export function sortMarkets(rows, { sortBy = 'score', order = 'desc' } = {}) {
+  const direction = order === 'asc' ? 1 : -1;
+  const key = ['score', 'liquidity', 'volume', 'spread', 'midpoint'].includes(sortBy)
+    ? sortBy
+    : 'score';
+
+  const valueOf = (row) => {
+    const raw = row?.[key];
+    if (raw == null) return Number.NEGATIVE_INFINITY;
+    const num = Number(raw);
+    return Number.isFinite(num) ? num : Number.NEGATIVE_INFINITY;
+  };
+
+  return [...rows].sort((a, b) => (valueOf(a) - valueOf(b)) * direction);
+}
