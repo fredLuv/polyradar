@@ -15,6 +15,20 @@ npm start
 
 Open: `http://127.0.0.1:8790`
 
+## Free remote hosting (Render)
+
+Use this one-click deploy:
+
+[Deploy to Render](https://render.com/deploy?repo=https://github.com/fredLuv/polyradar)
+
+Repo includes [`render.yaml`](render.yaml) with safe defaults:
+
+- `HOST=0.0.0.0` for cloud binding
+- `ENABLE_TRADING=false`
+- `POLYRADAR_MOCK_IF_UNAVAILABLE=true`
+
+Note: on free hosting, if `polymarket-cli` is not installed, the app stays online using mock fallback data.
+
 ## Why
 
 Polymarket has many fast-moving markets. PolyRadar helps you:

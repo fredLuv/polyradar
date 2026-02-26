@@ -9,6 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const webDir = path.resolve(__dirname, '../web');
 
+const host = String(process.env.HOST || '127.0.0.1').trim() || '127.0.0.1';
 const port = Number(process.env.PORT || 8790);
 const defaultLimit = Number(process.env.POLYRADAR_DEFAULT_LIMIT || 20);
 const maxEnrich = Number(process.env.POLYRADAR_MAX_ENRICH || 8);
@@ -197,6 +198,6 @@ app.post('/api/trade/execute', async (req, res) => {
   }
 });
 
-app.listen(port, '127.0.0.1', () => {
-  console.log(`[polyradar] running at http://127.0.0.1:${port}`);
+app.listen(port, host, () => {
+  console.log(`[polyradar] running at http://${host}:${port}`);
 });

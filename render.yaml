@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: polyradar
+    env: node
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: HOST
+        value: 0.0.0.0
+      - key: ENABLE_TRADING
+        value: "false"
+      - key: POLYRADAR_MOCK_IF_UNAVAILABLE
+        value: "true"
