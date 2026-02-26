@@ -1,0 +1,19 @@
+{
+  "name": "polyradar",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "PolyRadar: Polymarket CLI scanner + execution copilot",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "check": "node --check src/server.js && node --check src/lib/polymarketClient.js && node --check src/lib/scoring.js && node --check web/app.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0"
+  }
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PolyRadar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <h1>PolyRadar</h1>
+        <p>Scan Polymarket opportunities, rank market quality, and generate execution-safe order commands.</p>
+      </header>
+
+      <section class="panel controls">
+        <div class="field">
+          <label for="search">Search</label>
+          <input id="search" placeholder="bitcoin, election, inflation" />
+        </div>
+        <div class="field small">
+          <label for="limit">Limit</label>
+          <input id="limit" type="number" value="20" min="1" max="100" />
+        </div>
+        <div class="field check">
+          <label for="enrich">Depth Enrichment</label>
+          <input id="enrich" type="checkbox" checked />
+        </div>
+        <button id="scanBtn">Run Scan</button>
+      </section>
+
+      <section class="panel status">
+        <div id="statusLine">Loading...</div>
+      </section>
+
+      <section id="results" class="grid"></section>
+    </main>
+
+    <template id="cardTemplate">
+      <article class="card">
+        <div class="card-top">
+          <div class="score"></div>
+          <a class="open" target="_blank" rel="noreferrer">Open</a>
+        </div>
+        <h3 class="question"></h3>
+        <div class="meta"></div>
+        <div class="actions">
+          <button class="copy-buy">Copy Buy Cmd</button>
+          <button class="copy-sell">Copy Sell Cmd</button>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

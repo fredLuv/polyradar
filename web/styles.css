@@ -1,0 +1,158 @@
+:root {
+  --bg: #f4f8ed;
+  --bg2: #ddebd9;
+  --ink: #101b14;
+  --line: #b6cdb7;
+  --panel: #ffffffd9;
+  --accent: #0e8a5b;
+  --accent-2: #1864ab;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Space Grotesk', sans-serif;
+  background:
+    radial-gradient(circle at 10% 10%, #fffccf 0, transparent 28%),
+    radial-gradient(circle at 90% 20%, #d8f6ea 0, transparent 32%),
+    linear-gradient(140deg, var(--bg), var(--bg2));
+  min-height: 100vh;
+}
+
+.shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 20px 14px 40px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+}
+
+.hero p {
+  margin: 8px 0 0;
+  max-width: 760px;
+  opacity: 0.8;
+}
+
+.panel {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 16px;
+  padding: 12px;
+  backdrop-filter: blur(8px);
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 120px 170px 160px;
+  gap: 10px;
+  align-items: end;
+}
+
+.field label {
+  display: block;
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.field input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  font: inherit;
+}
+
+.field.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field.check input {
+  width: 18px;
+  height: 18px;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(140deg, var(--accent), #0b6f49);
+}
+
+.status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+}
+
+.grid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: #fff;
+  box-shadow: 0 6px 16px rgba(16, 27, 20, 0.08);
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.score {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--accent-2);
+}
+
+.open {
+  font-size: 12px;
+  color: var(--accent-2);
+}
+
+.question {
+  margin: 10px 0;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+
+.copy-sell {
+  background: linear-gradient(140deg, #145ca1, #0a3f71);
+}
+
+@media (max-width: 900px) {
+  .controls {
+    grid-template-columns: 1fr 1fr;
+  }
+}
