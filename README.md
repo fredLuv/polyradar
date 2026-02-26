@@ -2,7 +2,7 @@
 
 Local scanner + trade-prep UI built on top of [`polymarket-cli`](https://github.com/Polymarket/polymarket-cli).
 
-![PolyRadar themed bitcoin scan](docs/polyradar-theme-bitcoin.png)
+![PolyRadar GTA scan](docs/polyradar-gta-latest.png)
 
 ## Quick start
 
@@ -23,11 +23,12 @@ Polymarket has many fast-moving markets. PolyRadar helps you:
 - compare quality (volume/liquidity/spread) in one place
 - move from discovery to safe trade prep without raw CLI juggling
 
-## What it does
+## Functionalities
 
-- scans/ranks markets from `polymarket markets list/search`
-- enriches with CLOB midpoint/spread (best effort)
-- provides trade prep flow: simulate -> risk checks -> optional execute
+- scan and rank live Polymarket markets by liquidity/volume/score
+- filter by keyword (example: `GTA`) and open market pages directly
+- enrich with midpoint/spread where available, with graceful fallback
+- prepare orders via simulate, risk checks, then optional execution
 
 ## Config
 
