@@ -68,9 +68,9 @@ Open:
 
 ## Live screenshot
 
-Bitcoin scan after typing `bitcoin` in Search and running `Run Scan`:
+Polymarket-style themed UI after typing `bitcoin` in Search and running `Run Scan`:
 
-![PolyRadar bitcoin scan](docs/polyradar-bitcoin-scan.png)
+![PolyRadar themed bitcoin scan](docs/polyradar-theme-bitcoin.png)
 
 ## API
 

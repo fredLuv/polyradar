@@ -16,6 +16,7 @@ const copyCmdBtn = document.getElementById('copyCmdBtn');
 const executeBtn = document.getElementById('executeBtn');
 const tradeRisk = document.getElementById('tradeRisk');
 const tradeCommand = document.getElementById('tradeCommand');
+const quickChips = Array.from(document.querySelectorAll('.quick-chip'));
 
 let config = null;
 let selectedMarket = null;
@@ -170,7 +171,16 @@ function selectMarket(market) {
   selectedMarket = market;
   renderTradePanel();
   resetSimulationState();
+  renderSelectedCardState();
   tradePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function renderSelectedCardState() {
+  const cards = Array.from(resultsEl.querySelectorAll('.card'));
+  for (const card of cards) {
+    const sameId = selectedMarket && card.dataset.marketId === selectedMarket.id;
+    card.classList.toggle('selected', Boolean(sameId));
+  }
 }
 
 function renderMarkets(markets) {
@@ -219,8 +229,11 @@ function renderMarkets(markets) {
     }
 
     card.dataset.score = String(market.score);
+    card.dataset.marketId = market.id;
     resultsEl.appendChild(node);
   }
+
+  renderSelectedCardState();
 }
 
 async function runScan() {
@@ -261,6 +274,12 @@ copyCmdBtn.addEventListener('click', () => {
 executeBtn.addEventListener('click', runExecute);
 tradeSideEl.addEventListener('change', resetSimulationState);
 tradeAmountEl.addEventListener('input', resetSimulationState);
+for (const chip of quickChips) {
+  chip.addEventListener('click', async () => {
+    searchEl.value = chip.dataset.query || '';
+    await runScan();
+  });
+}
 
 (async function init() {
   await loadConfig();
