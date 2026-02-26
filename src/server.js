@@ -30,6 +30,45 @@ function asInt(value, fallback) {
   return Math.floor(num);
 }
 
+function asNum(value) {
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+}
+
+function parseOutcomePrices(value) {
+  if (typeof value !== 'string' || !value.trim()) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.map((v) => asNum(v)).filter((v) => v != null) : [];
+  } catch {
+    return [];
+  }
+}
+
+function fallbackDepthFromMarket(market) {
+  const raw = market.raw || {};
+  const spread = asNum(raw.spread);
+  const bestBid = asNum(raw.bestBid);
+  const bestAsk = asNum(raw.bestAsk);
+  const lastTrade = asNum(raw.lastTradePrice);
+  const outcomes = parseOutcomePrices(raw.outcomePrices);
+
+  let midpoint = null;
+  if (bestBid != null && bestAsk != null && bestBid >= 0 && bestAsk >= 0) {
+    midpoint = (bestBid + bestAsk) / 2;
+  } else if (lastTrade != null) {
+    midpoint = lastTrade;
+  } else if (outcomes.length > 0) {
+    midpoint = outcomes[0];
+  }
+
+  if (midpoint == null && spread == null) {
+    return { midpoint: null, spread: null, source: 'none' };
+  }
+
+  return { midpoint, spread, source: 'market' };
+}
+
 async function buildScan({ search, limit, enrich, sortBy, order }) {
   const { source, markets } = await client.listMarketsWithFallback({ limit, search });
   const normalized = markets
@@ -45,12 +84,23 @@ async function buildScan({ search, limit, enrich, sortBy, order }) {
       depth = await client.depthWithFallback(market.tokenId);
     }
 
+    if (depth.midpoint == null && depth.spread == null) {
+      depth = fallbackDepthFromMarket(market);
+    } else if (depth.midpoint == null || depth.spread == null) {
+      const fallback = fallbackDepthFromMarket(market);
+      depth = {
+        midpoint: depth.midpoint ?? fallback.midpoint,
+        spread: depth.spread ?? fallback.spread,
+        source: depth.source === 'live' ? 'live' : fallback.source
+      };
+    }
+
     const metrics = scoreMarket(market, depth);
     enriched.push({
       ...market,
       ...metrics,
       depthSource: depth.source,
-      marketUrl: market.slug ? `https://polymarket.com/event/${market.slug}` : null
+      marketUrl: market.slug ? `https://polymarket.com/market/${market.slug}` : null
     });
   }
 

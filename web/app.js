@@ -213,7 +213,6 @@ function renderMarkets(markets) {
     }
 
     meta.innerHTML = [
-      `source=${market.depthSource} | confidence=${(market.confidence * 100).toFixed(0)}%`,
       `volume=$${fmtMoney(market.volume)} | liquidity=$${fmtMoney(market.liquidity)}`,
       `mid=${market.midpoint == null ? '-' : market.midpoint.toFixed(3)} | spread=${fmtPct(market.spread)}`,
       `token=${market.tokenId || '-'}`
