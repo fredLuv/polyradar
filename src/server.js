@@ -57,7 +57,7 @@ async function buildScan({ search, limit, enrich }) {
   return {
     source,
     generatedAt: new Date().toISOString(),
-    markets: sortByScore(enriched)
+    markets: sortByScore(enriched).slice(0, limit)
   };
 }
 

@@ -57,22 +57,24 @@ export class PolymarketClient {
   }
 
   async listMarkets({ limit = 20, search = '' } = {}) {
+    const fetchLimit = Math.min(Math.max(limit * 5, limit), 200);
+
     if (search) {
-      const payload = await this.runJson(['markets', 'search', search, '--limit', String(limit)]);
-      return unwrapArray(payload);
+      const payload = await this.runJson(['markets', 'search', search, '--limit', String(fetchLimit)]);
+      return unwrapArray(payload).slice(0, fetchLimit);
     }
 
     const payload = await this.runJson([
       'markets',
       'list',
       '--limit',
-      String(limit),
+      String(fetchLimit),
       '--active',
       'true',
       '--closed',
       'false'
     ]);
-    return unwrapArray(payload);
+    return unwrapArray(payload).slice(0, fetchLimit);
   }
 
   async midpoint(tokenId) {
