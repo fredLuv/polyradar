@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
 import 'dotenv/config';
@@ -14,6 +15,7 @@ const port = Number(process.env.PORT || 8790);
 const defaultLimit = Number(process.env.POLYRADAR_DEFAULT_LIMIT || 20);
 const maxEnrich = Number(process.env.POLYRADAR_MAX_ENRICH || 8);
 const tradingEnabled = String(process.env.ENABLE_TRADING || 'false').toLowerCase() === 'true';
+const adminKey = String(process.env.POLYRADAR_ADMIN_KEY || '').trim();
 
 const client = new PolymarketClient({
   binary: process.env.POLYMARKET_BIN || 'polymarket',
@@ -22,7 +24,30 @@ const client = new PolymarketClient({
 });
 
 const app = express();
-app.use(express.json());
+app.disable('x-powered-by');
+app.use((_, res, next) => {
+  res.set({
+    'Content-Security-Policy': [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "frame-ancestors 'none'",
+      "form-action 'self'",
+      "script-src 'self'",
+      "style-src 'self' https://fonts.googleapis.com",
+      "font-src https://fonts.gstatic.com",
+      "connect-src 'self'",
+      "img-src 'self' data: https:"
+    ].join('; '),
+    'Cross-Origin-Resource-Policy': 'same-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY'
+  });
+  next();
+});
+app.use(express.json({ limit: '16kb', type: 'application/json' }));
 app.use(express.static(webDir));
 
 function asInt(value, fallback) {
@@ -34,6 +59,17 @@ function asInt(value, fallback) {
 function asNum(value) {
   const num = Number(value);
   return Number.isFinite(num) ? num : null;
+}
+
+function safeEqual(a, b) {
+  const left = Buffer.from(a);
+  const right = Buffer.from(b);
+  return left.length === right.length && timingSafeEqual(left, right);
+}
+
+function hasTradingAdmin(req) {
+  const provided = String(req.get('x-polyradar-admin-key') || '');
+  return Boolean(adminKey) && safeEqual(provided, adminKey);
 }
 
 function parseOutcomePrices(value) {
@@ -100,7 +136,7 @@ async function buildScan({ search, limit, enrich, sortBy, order }) {
     enriched.push({
       ...market,
       ...metrics,
-      marketUrl: market.slug ? `https://polymarket.com/market/${market.slug}` : null
+      marketUrl: market.slug ? `https://polymarket.com/market/${encodeURIComponent(market.slug)}` : null
     });
   }
 
@@ -179,6 +215,18 @@ app.post('/api/trade/execute', async (req, res) => {
   if (!tradingEnabled) {
     return res.status(403).json({
       error: 'Trading is disabled. Set ENABLE_TRADING=true to enable execution.'
+    });
+  }
+
+  if (!adminKey) {
+    return res.status(503).json({
+      error: 'Trading execution requires POLYRADAR_ADMIN_KEY.'
+    });
+  }
+
+  if (!hasTradingAdmin(req)) {
+    return res.status(401).json({
+      error: 'Missing or invalid trading admin key.'
     });
   }
 

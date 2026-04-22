@@ -37,6 +37,27 @@ function toast(message) {
   statusLine.textContent = message;
 }
 
+function setTextLines(element, lines) {
+  element.replaceChildren();
+  lines.forEach((line, index) => {
+    if (index > 0) element.appendChild(document.createElement('br'));
+    element.appendChild(document.createTextNode(line));
+  });
+}
+
+function safePolymarketUrl(value) {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    if (url.protocol === 'https:' && url.hostname === 'polymarket.com') {
+      return url.href;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 async function loadConfig() {
   const res = await fetch('/api/config');
   config = await res.json();
@@ -75,16 +96,23 @@ function renderTradePanel() {
   }
 
   tradePanel.classList.remove('hidden');
-  tradeMarket.innerHTML = [
-    `<strong>${selectedMarket.question}</strong>`,
-    `token=${selectedMarket.tokenId}`,
-    `score=${selectedMarket.score.toFixed(2)} | volume=$${fmtMoney(selectedMarket.volume)} | liquidity=$${fmtMoney(selectedMarket.liquidity)}`
-  ].join('<br/>');
+  tradeMarket.replaceChildren();
+  const question = document.createElement('strong');
+  question.textContent = selectedMarket.question || 'Untitled market';
+  tradeMarket.append(
+    question,
+    document.createElement('br'),
+    document.createTextNode(`token=${selectedMarket.tokenId}`),
+    document.createElement('br'),
+    document.createTextNode(
+      `score=${selectedMarket.score.toFixed(2)} | volume=$${fmtMoney(selectedMarket.volume)} | liquidity=$${fmtMoney(selectedMarket.liquidity)}`
+    )
+  );
 }
 
 function resetSimulationState() {
   lastSimulation = null;
-  tradeRisk.innerHTML = '';
+  tradeRisk.replaceChildren();
   tradeCommand.textContent = 'No command yet.';
 }
 
@@ -109,7 +137,13 @@ async function runSimulation() {
     lastSimulation = { payload, token: selectedMarket.tokenId, side, amount };
 
     tradeCommand.textContent = payload.commandText;
-    tradeRisk.innerHTML = payload.riskChecks.map((line) => `<div>- ${line}</div>`).join('');
+    tradeRisk.replaceChildren(
+      ...payload.riskChecks.map((line) => {
+        const item = document.createElement('div');
+        item.textContent = `- ${line}`;
+        return item;
+      })
+    );
     toast(`Simulation ready for ${side.toUpperCase()} ${amount}`);
   } catch (error) {
     toast(`Simulation failed: ${error.message}`);
@@ -185,10 +219,12 @@ function renderSelectedCardState() {
 }
 
 function renderMarkets(markets) {
-  resultsEl.innerHTML = '';
+  resultsEl.replaceChildren();
 
   if (!markets.length) {
-    resultsEl.innerHTML = '<p>No markets found.</p>';
+    const empty = document.createElement('p');
+    empty.textContent = 'No markets found.';
+    resultsEl.appendChild(empty);
     return;
   }
 
@@ -205,8 +241,9 @@ function renderMarkets(markets) {
     score.textContent = `Score ${market.score.toFixed(2)}`;
     question.textContent = market.question;
 
-    if (market.marketUrl) {
-      link.href = market.marketUrl;
+    const marketUrl = safePolymarketUrl(market.marketUrl);
+    if (marketUrl) {
+      link.href = marketUrl;
     } else {
       link.removeAttribute('href');
       link.textContent = 'No URL';
@@ -219,7 +256,7 @@ function renderMarkets(markets) {
       );
     }
     metaLines.push(`token=${market.tokenId || '-'}`);
-    meta.innerHTML = metaLines.join('<br/>');
+    setTextLines(meta, metaLines);
 
     if (!market.tokenId) {
       prepareBtn.disabled = true;
@@ -265,7 +302,9 @@ async function runScan() {
     renderMarkets(body.markets);
   } catch (error) {
     toast(`Scan failed: ${error.message}`);
-    resultsEl.innerHTML = '<p>Scan failed. Check server logs.</p>';
+    const failure = document.createElement('p');
+    failure.textContent = 'Scan failed. Check server logs.';
+    resultsEl.replaceChildren(failure);
   } finally {
     scanBtn.disabled = false;
   }
